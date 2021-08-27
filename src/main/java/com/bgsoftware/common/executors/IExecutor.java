@@ -12,4 +12,9 @@ public interface IExecutor<R> extends Runnable {
      */
     R start(JavaPlugin plugin);
 
+    /**
+     * Stop the associated executor from running.
+     */
+    void stop();
+
 }

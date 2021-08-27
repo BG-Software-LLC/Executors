@@ -109,6 +109,19 @@ public class WorkerExecutor implements IExecutor<CompletableFuture<Integer>> {
     }
 
     /**
+     * Stop the executor from running any longer.
+     * The remaining executors that haven't finished can be retrieved using {@link #getFailedWorkers()}.
+     * This executor can be started again using {@link #start(JavaPlugin)}.
+     */
+    @Override
+    public void stop() {
+        this.associatedBukkitTask.cancel();
+        this.failedWorkers.addAll(this.workers);
+        this.endExecutorFuture.complete(this.completedWorkers.get());
+        this.endExecutorFuture = null;
+    }
+
+    /**
      * The main logic of the executor.
      * Do not run this method directly, unless you want to handle the loop on your own.
      * Otherwise, check {@link #start(JavaPlugin)} for starting this executor.
@@ -136,9 +149,7 @@ public class WorkerExecutor implements IExecutor<CompletableFuture<Integer>> {
         }
 
         if (currentWorker == null) {
-            this.associatedBukkitTask.cancel();
-            this.endExecutorFuture.complete(this.completedWorkers.get());
-            this.endExecutorFuture = null;
+            this.stop();
         }
     }
 
