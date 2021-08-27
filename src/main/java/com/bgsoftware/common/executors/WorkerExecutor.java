@@ -76,7 +76,6 @@ public class WorkerExecutor implements IExecutor<CompletableFuture<Integer>> {
      * @param worker The worker to add.
      */
     public void addWorker(IWorker worker) {
-        Preconditions.checkState(this.endExecutorFuture == null, "You cannot add additional workers to an already on going executor.");
         this.workers.add(worker);
     }
 
