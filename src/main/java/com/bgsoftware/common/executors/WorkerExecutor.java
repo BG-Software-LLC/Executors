@@ -80,6 +80,9 @@ public class WorkerExecutor implements IExecutor<CompletableFuture<Integer>> {
         this.workers.add(worker);
     }
 
+    /**
+     * Get the failed workers during the executor operation.
+     */
     public Deque<IWorker> getFailedWorkers() {
         return this.failedWorkers;
     }
