@@ -13,6 +13,11 @@ public interface IExecutor<R> extends Runnable {
     R start(JavaPlugin plugin);
 
     /**
+     * Whether the associated executor is running or not.
+     */
+    boolean isRunning();
+
+    /**
      * Stop the associated executor from running.
      */
     void stop();
