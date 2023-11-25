@@ -88,23 +88,27 @@ public class WorkerExecutor implements IExecutor<CompletableFuture<Integer>> {
 
     /**
      * Start running the workers of the executor.
-     *
+     * <p>
      * The executor will run each batch of workers in separate ticks, and will make sure they last
      * at most {@link #maximumMilliseconds} milliseconds. The executor will end once all the workers
      * have done their job.
      *
      * @param plugin The plugin instance that called the executor.
-     *
      * @return {@link CompletableFuture} object that will be completed once the executor finishes executing
      * all the workers given with {@link #addWorker(IWorker)}. For more information about the {@link CompletableFuture},
      * see {@link #endExecutorFuture}
      */
     @Override
     public CompletableFuture<Integer> start(JavaPlugin plugin) {
+        return start((runnable, delay, interval) -> plugin.getServer().getScheduler()
+                .runTaskTimer(plugin, runnable, delay, interval));
+    }
+
+    public CompletableFuture<Integer> start(ITimerCreator timerCreator) {
         Preconditions.checkState(this.endExecutorFuture == null, "You cannot start an executor that has an already on going task.");
         this.endExecutorFuture = new CompletableFuture<>();
         this.completedWorkers.set(0);
-        this.associatedBukkitTask = plugin.getServer().getScheduler().runTaskTimer(plugin, this, 0L, 1L);
+        this.associatedBukkitTask = timerCreator.createTimer(this, 0L, 1L);
         return endExecutorFuture;
     }
 
@@ -125,7 +129,7 @@ public class WorkerExecutor implements IExecutor<CompletableFuture<Integer>> {
     public void stop() {
         this.associatedBukkitTask.cancel();
         this.failedWorkers.addAll(this.workers);
-        if(this.endExecutorFuture != null) {
+        if (this.endExecutorFuture != null) {
             this.endExecutorFuture.complete(this.completedWorkers.get());
             this.endExecutorFuture = null;
         }
@@ -135,7 +139,7 @@ public class WorkerExecutor implements IExecutor<CompletableFuture<Integer>> {
      * The main logic of the executor.
      * Do not run this method directly, unless you want to handle the loop on your own.
      * Otherwise, check {@link #start(JavaPlugin)} for starting this executor.
-     *
+     * <p>
      * The executor first calculates the time it needs to finish by taking the current time and adding to it
      * the value of {@link #maximumMilliseconds}. After that, it starts a while-loop that can end if the
      * time has exceeded, or if there are no workers left to execute. Each iteration, it looks for the next
