@@ -128,7 +128,8 @@ public class WorkerExecutor implements IExecutor<CompletableFuture<Integer>> {
     @Override
     public void stop() {
         this.associatedBukkitTask.cancel();
-        this.failedWorkers.addAll(this.workers);
+        if (!this.workers.isEmpty())
+            this.failedWorkers.addAll(this.workers);
         if (this.endExecutorFuture != null) {
             this.endExecutorFuture.complete(this.completedWorkers.get());
             this.endExecutorFuture = null;
